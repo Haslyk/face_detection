@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Yüz Tanıma Uygulaması</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 {
+            font-size: 1.8em;
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"], input[type="file"] {
+            display: block;
+            margin: 10px 0 20px 0;
+            padding: 10px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #process-button {
+            margin-top: 20px;
+            display: block;
+        }
+        #results img {
+            max-width: 100%;
+            margin-top: 15px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Selfie Yükle</h1>
+    <form id="selfie-form" enctype="multipart/form-data">
+        <label for="name">İsim:</label>
+        <input type="text" name="name" id="name" required>
+
+        <label for="selfie">Selfie:</label>
+        <input type="file" name="selfie" id="selfie" accept="image/*" capture="camera" required>
+
+        <button type="submit">Selfie Yükle</button>
+    </form>
+
+    <h1>Grup Fotoğrafları Yükle</h1>
+    <form id="group-form" enctype="multipart/form-data">
+        <label for="group_photos">Grup Fotoğrafları:</label>
+        <input type="file" name="group_photos" id="group_photos" accept="image/*" multiple required>
+
+        <button type="submit">Grup Fotoğraflarını Yükle</button>
+    </form>
+
+    <button id="process-button">İşlemi Başlat</button>
+
+    <h1>Sonuçlar</h1>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('selfie-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+
+            fetch('/upload_selfie', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || data.error);
+            });
+        });
+
+        document.getElementById('group-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+
+            fetch('/upload_group_photos', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || data.error);
+            });
+        });
+
+        document.getElementById('process-button').addEventListener('click', function() {
+            fetch('/process_images')
+            .then(response => response.json())
+            .then(data => {
+                var resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '';
+                data.forEach(item => {
+                    var img = document.createElement('img');
+                    img.src = '/processed/' + item.processed_photo;
+                    resultsDiv.appendChild(img);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
